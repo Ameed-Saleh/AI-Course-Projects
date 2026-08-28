@@ -1,13 +1,32 @@
 # Loan Approval Prediction System 🚀
 
-### 🔗 Quick Links / קישורים מהירים:
-* 📊 **[Open Loan Dashboard / פתיחת דאשבורד](http://127.0.0.1:5000/dashboard)**
-* 📊 **[Another URL to Open Loan Dashboard / פתיחת דאשבורד](http://192.168.68.54:5000/dashboard)**
-* 
-* 🏠 **[Open Main Application / פתיחת אפליקציה ראשית](http://127.0.0.1:5000)**
-* 🏠 **[Another URL to Open Main Application / פתיחת אפליקציה ראשית](http://192.168.68.54:5000)**
+## 🌐 Bonus Deployment — COMPLETED ✅
+
+The bonus deployment task has been successfully completed.  
+The Loan Approval Prediction System is now live on Render.
+
+משימת הבונוס הושלמה בהצלחה!  
+מערכת חיזוי אישור ההלוואה זמינה כעת ב־Render.
+
+🚀 **[Open the Live Application / פתיחת האתר](https://ai-course-projects-45zz.onrender.com/)**
+
+📊 **[Open the Live Dashboard / פתיחת הדאשבורד](https://ai-course-projects-45zz.onrender.com/dashboard)**
+
 ---
 
-### ℹ️ How to Run
-1. Make sure your Flask server is running (`python app.py`).
-2. Click the link above to open the dashboard.
+## 🔗 Local Development Links / קישורים מקומיים
+
+> These links work only when the Flask application is running locally.
+
+- 🏠 **[Open Main Application / פתיחת האפליקציה הראשית](http://127.0.0.1:5000/)**
+- 📊 **[Open Loan Dashboard / פתיחת הדאשבורד](http://127.0.0.1:5000/dashboard)**
+
+---
+
+## ℹ️ How to Run Locally
+
+1. Open the terminal inside the `Loan_Project` directory.
+2. Install the required packages:
+
+   ```bash
+   pip install -r requirements.txt
