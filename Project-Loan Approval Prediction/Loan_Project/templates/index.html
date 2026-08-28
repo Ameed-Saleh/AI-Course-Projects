@@ -5,232 +5,827 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Loan Approval Checker | בדיקת זכאות להלוואה</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; transition: all 0.25s ease; }
-        body { background: radial-gradient(circle at top, #1e293b, #0f172a); color: #f8fafc; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        
-        .container { background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(10px); border-radius: 24px; padding: 36px; width: 100%; max-width: 520px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); position: relative; }
-        
-        /* Navigation & Language Header */
-        .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-        
-        .btn-dash { background: linear-gradient(135deg, #06b6d4, #3b82f6); color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 12px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 0 15px rgba(6, 182, 212, 0.3); }
-        .btn-dash:hover { transform: translateY(-2px); box-shadow: 0 0 25px rgba(6, 182, 212, 0.6); }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-        .lang-switch { display: flex; gap: 4px; background: #0f172a; padding: 4px; border-radius: 12px; border: 1px solid #334155; }
-        .lang-btn { background: none; border: none; color: #94a3b8; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 12px; }
-        .lang-btn.active { background: #2563eb; color: #fff; box-shadow: 0 0 10px rgba(37, 99, 235, 0.5); }
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            color: #f8fafc;
+            background:
+                radial-gradient(circle at 15% 10%, rgba(37, 99, 235, 0.25), transparent 32%),
+                radial-gradient(circle at 85% 90%, rgba(124, 58, 237, 0.22), transparent 34%),
+                #0f172a;
+        }
 
-        h1 { font-size: 26px; font-weight: 800; margin-bottom: 6px; background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        p.subtitle { color: #94a3b8; font-size: 13px; margin-bottom: 24px; }
-        
-        .form-group { margin-bottom: 18px; text-align: start; }
-        label { display: block; font-size: 13.5px; font-weight: 600; color: #cbd5e1; margin-bottom: 6px; }
-        input, select { width: 100%; background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 12px 14px; color: #f8fafc; font-size: 14px; outline: none; }
-        input:focus, select:focus { border-color: #3b82f6; box-shadow: 0 0 12px rgba(59, 130, 246, 0.4); }
-        
-        input[readonly] { background: #182234 !important; cursor: not-allowed; border-color: #334155; color: #38bdf8; font-weight: 700; }
+        button,
+        input,
+        select,
+        a {
+            transition: 0.2s ease;
+        }
 
-        .btn-submit { width: 100%; background: linear-gradient(135deg, #2563eb, #7c3aed); color: #ffffff; border: none; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4); }
-        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(124, 58, 237, 0.6); }
+        .container {
+            width: 100%;
+            max-width: 620px;
+            padding: 36px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            background: rgba(30, 41, 59, 0.96);
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.48);
+            backdrop-filter: blur(14px);
+        }
 
-        .result-card { margin-top: 24px; padding: 20px; border-radius: 16px; text-align: center; font-weight: 700; font-size: 20px; display: none; animation: popIn 0.3s ease-out; }
-        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
 
-        .approved { background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 95, 70, 0.4)); border: 2px solid #10b981; color: #34d399; box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); }
-        .rejected { background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(153, 27, 27, 0.4)); border: 2px solid #ef4444; color: #f87171; box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
-        .result-desc { font-size: 13px; font-weight: 400; color: #cbd5e1; margin-top: 8px; }
+        .btn-dash {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 15px;
+            border-radius: 12px;
+            color: #fff;
+            background: linear-gradient(135deg, #06b6d4, #3b82f6);
+            box-shadow: 0 0 18px rgba(6, 182, 212, 0.25);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .btn-dash:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 24px rgba(6, 182, 212, 0.45);
+        }
+
+        .lang-switch {
+            display: flex;
+            gap: 4px;
+            padding: 4px;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            background: #0f172a;
+        }
+
+        .lang-btn {
+            padding: 6px 11px;
+            border: 0;
+            border-radius: 8px;
+            color: #94a3b8;
+            background: transparent;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .lang-btn.active {
+            color: #fff;
+            background: #2563eb;
+            box-shadow: 0 0 10px rgba(37, 99, 235, 0.45);
+        }
+
+        h1 {
+            margin-bottom: 7px;
+            font-size: 29px;
+            font-weight: 850;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            margin-bottom: 28px;
+            color: #94a3b8;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .form-group {
+            text-align: start;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            color: #cbd5e1;
+            font-size: 13.5px;
+            font-weight: 650;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            outline: none;
+            color: #f8fafc;
+            background: #0f172a;
+            font-size: 14px;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+        }
+
+        input[readonly] {
+            color: #38bdf8;
+            background: #182234;
+            cursor: not-allowed;
+            font-weight: 750;
+        }
+
+        .field-hint {
+            display: block;
+            min-height: 16px;
+            margin-top: 5px;
+            color: #64748b;
+            font-size: 11px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            margin-top: 24px;
+            padding: 15px;
+            border: 0;
+            border-radius: 12px;
+            color: #fff;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            box-shadow: 0 5px 22px rgba(124, 58, 237, 0.35);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 28px rgba(124, 58, 237, 0.5);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.65;
+            cursor: wait;
+            transform: none;
+        }
+
+        .result-card {
+            display: none;
+            margin-top: 24px;
+            padding: 21px;
+            border-radius: 16px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 750;
+            animation: pop-in 0.25s ease-out;
+        }
+
+        .approved {
+            color: #34d399;
+            border: 2px solid #10b981;
+            background: linear-gradient(
+                135deg,
+                rgba(16, 185, 129, 0.18),
+                rgba(6, 95, 70, 0.36)
+            );
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.24);
+        }
+
+        .rejected {
+            color: #f87171;
+            border: 2px solid #ef4444;
+            background: linear-gradient(
+                135deg,
+                rgba(239, 68, 68, 0.18),
+                rgba(153, 27, 27, 0.34)
+            );
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.22);
+        }
+
+        .validation-error {
+            color: #fbbf24;
+            border: 2px solid #f59e0b;
+            background: rgba(245, 158, 11, 0.13);
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.18);
+        }
+
+        .result-desc {
+            margin-top: 8px;
+            color: #cbd5e1;
+            font-size: 13px;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        .result-section {
+            margin-top: 15px;
+            text-align: start;
+            font-size: 13px;
+        }
+
+        .result-section strong {
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .result-section ul {
+            padding-inline-start: 21px;
+            color: #e2e8f0;
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1.75;
+        }
+
+        .result-note {
+            margin-top: 15px;
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        @keyframes pop-in {
+            from {
+                opacity: 0;
+                transform: translateY(8px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @media (max-width: 620px) {
+            body {
+                padding: 12px;
+                align-items: flex-start;
+            }
+
+            .container {
+                padding: 24px 18px;
+                border-radius: 20px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-actions {
+                align-items: flex-start;
+            }
+        }
     </style>
 </head>
+
 <body>
+    <main class="container">
+        <div class="header-actions">
+            <a href="/dashboard" class="btn-dash">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span id="txt-dash-btn">מדדי המודל</span>
+            </a>
 
-<div class="container">
-    <div class="header-actions">
-        <a href="/dashboard" class="btn-dash" id="btn-dash">
-            <i class="fa-solid fa-chart-pie"></i> <span id="txt-dash-btn">מדדי המודל</span>
-        </a>
+            <div class="lang-switch">
+                <button
+                    type="button"
+                    class="lang-btn active"
+                    data-language="he"
+                >
+                    עברית 🇮🇱
+                </button>
 
-        <div class="lang-switch">
-            <button type="button" class="lang-btn active" onclick="setLanguage('he', event)">עברית 🇮🇱</button>
-            <button type="button" class="lang-btn" onclick="setLanguage('en', event)">English 🇺🇸</button>
-        </div>
-    </div>
-
-    <h1 id="txt-title">בדיקת זכאות להלוואה</h1>
-    <p class="subtitle" id="txt-subtitle">הזן את פרטי המבקש לצורך ניתוח זכאות בזמן אמת</p>
-
-    <form id="loanForm">
-        <div class="form-group">
-            <label id="lbl-age">🎂 גיל המבקש</label>
-            <input type="number" id="person_age" value="24" required>
-        </div>
-
-        <div class="form-group">
-            <label id="lbl-income">💵 הכנסה שנתית ($)</label>
-            <input type="number" id="person_income" value="200000" required>
-        </div>
-
-        <div class="form-group">
-            <label id="lbl-emp">💼 וותק בעבודה (בשנים)</label>
-            <input type="number" id="person_emp_exp" value="3" required>
+                <button
+                    type="button"
+                    class="lang-btn"
+                    data-language="en"
+                >
+                    English 🇺🇸
+                </button>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label id="lbl-amount">💰 סכום ההלוואה המבוקש ($)</label>
-            <input type="number" id="loan_amnt" value="40000" required>
-        </div>
+        <h1 id="txt-title">בדיקת זכאות להלוואה</h1>
 
-        <div class="form-group">
-            <label id="lbl-rate">📈 שיעור ריבית (%)</label>
-            <input type="number" step="0.01" id="loan_int_rate" value="14.0" required>
-        </div>
+        <p class="subtitle" id="txt-subtitle">
+            הזינו את פרטי המבקש לקבלת תחזית המבוססת על מודל למידת מכונה
+        </p>
 
-        <div class="form-group">
-            <label id="lbl-percent">⚡ אחוז הלוואה מההכנסה (מחושב אוטומטית)</label>
-            <input type="number" step="0.01" id="loan_percent_income" value="0.20" readonly>
-        </div>
+        <form id="loan-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="person_age" id="label-age">
+                        🎂 גיל המבקש
+                    </label>
 
-        <div class="form-group">
-            <label id="lbl-defaults">⚠️ חדלות פירעון בעבר?</label>
-            <select id="previous_loan_defaults">
-                <option value="N" id="opt-no">❌ לא (N)</option>
-                <option value="Y" id="opt-yes">⚠️ כן (Y)</option>
-            </select>
-        </div>
+                    <input
+                        type="number"
+                        id="person_age"
+                        min="20"
+                        max="80"
+                        step="1"
+                        required
+                    >
 
-        <button type="submit" class="btn-submit" id="btn-submit">🚀 בדוק זכאות עכשיו</button>
-    </form>
+                    <span class="field-hint" id="hint-age">
+                        טווח מומלץ: 20–80
+                    </span>
+                </div>
 
-    <div id="result" class="result-card"></div>
-</div>
+                <div class="form-group">
+                    <label for="person_income" id="label-income">
+                        💵 הכנסה שנתית ($)
+                    </label>
 
-<script>
-let currentLang = 'he';
+                    <input
+                        type="number"
+                        id="person_income"
+                        min="8000"
+                        step="1"
+                        required
+                    >
 
-const i18n = {
-    he: {
-        title: "בדיקת זכאות להלוואה",
-        subtitle: "הזן את פרטי המבקש לצורך ניתוח זכאות בזמן אמת",
-        dashBtn: "מדדי המודל",
-        age: "🎂 גיל המבקש",
-        income: "💵 הכנסה שנתית ($)",
-        emp: "💼 וותק בעבודה (בשנים)",
-        amount: "💰 סכום ההלוואה המבוקש ($)",
-        rate: "📈 שיעור ריבית (%)",
-        percent: "⚡ אחוז הלוואה מההכנסה (מחושב אוטומטית)",
-        defaults: "⚠️ חדלות פירעון בעבר?",
-        optNo: "❌ לא (N)",
-        optYes: "⚠️ כן (Y)",
-        btnSubmit: "🚀 בדוק זכאות עכשיו",
-        approvedTitle: "🎉 יששש! ההלוואה אושרה! 💸💵",
-        approvedDesc: "מזל טוב! המודל זיהה פרופיל אשראי מעולה ואישר את הבקשה.",
-        rejectedTitle: "❌ מצטערים, הבקשה נדחתה 😔💸",
-        rejectedDesc: "המודל זיהה רמת סיכון גבוהה מדי. מומלץ להקטין את סכום ההלוואה."
-    },
-    en: {
-        title: "Loan Eligibility Checker",
-        subtitle: "Enter applicant details to evaluate loan eligibility in real-time",
-        dashBtn: "Model Metrics",
-        age: "🎂 Applicant Age",
-        income: "💵 Annual Income ($)",
-        emp: "💼 Employment Experience (Years)",
-        amount: "💰 Requested Loan Amount ($)",
-        rate: "📈 Interest Rate (%)",
-        percent: "⚡ Loan Percent of Income (Auto Calculated)",
-        defaults: "⚠️ Previous Loan Defaults?",
-        optNo: "❌ No (N)",
-        optYes: "⚠️ Yes (Y)",
-        btnSubmit: "🚀 Check Eligibility Now",
-        approvedTitle: "🎉 Woohoo! Loan Approved! 💸💵",
-        approvedDesc: "Congratulations! The model identified a strong credit profile.",
-        rejectedTitle: "❌ Loan Not Approved 😔💸",
-        rejectedDesc: "The model identified high risk. Try lowering the loan amount."
-    }
-};
+                    <span class="field-hint" id="hint-income">
+                        יש להזין הכנסה שנתית
+                    </span>
+                </div>
 
-function autoCalculatePercent() {
-    const income = parseFloat(document.getElementById('person_income').value) || 0;
-    const amount = parseFloat(document.getElementById('loan_amnt').value) || 0;
-    
-    if (income > 0) {
-        document.getElementById('loan_percent_income').value = (amount / income).toFixed(2);
-    } else {
-        document.getElementById('loan_percent_income').value = 0;
-    }
-}
+                <div class="form-group">
+                    <label for="loan_amnt" id="label-amount">
+                        💰 סכום ההלוואה ($)
+                    </label>
 
-document.getElementById('person_income').addEventListener('input', autoCalculatePercent);
-document.getElementById('loan_amnt').addEventListener('input', autoCalculatePercent);
+                    <input
+                        type="number"
+                        id="loan_amnt"
+                        min="500"
+                        max="35000"
+                        step="1"
+                        required
+                    >
 
-function setLanguage(lang, evt) {
-    currentLang = lang;
-    document.documentElement.lang = lang;
-    document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
+                    <span class="field-hint" id="hint-amount">
+                        טווח נתוני האימון: 500–35,000
+                    </span>
+                </div>
 
-    document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-    if(evt) evt.target.classList.add('active');
+                <div class="form-group">
+                    <label for="loan_int_rate" id="label-rate">
+                        📈 שיעור ריבית (%)
+                    </label>
 
-    const t = i18n[lang];
-    document.getElementById('txt-title').innerText = t.title;
-    document.getElementById('txt-subtitle').innerText = t.subtitle;
-    document.getElementById('txt-dash-btn').innerText = t.dashBtn;
-    document.getElementById('lbl-age').innerText = t.age;
-    document.getElementById('lbl-income').innerText = t.income;
-    document.getElementById('lbl-emp').innerText = t.emp;
-    document.getElementById('lbl-amount').innerText = t.amount;
-    document.getElementById('lbl-rate').innerText = t.rate;
-    document.getElementById('lbl-percent').innerText = t.percent;
-    document.getElementById('lbl-defaults').innerText = t.defaults;
-    document.getElementById('opt-no').innerText = t.optNo;
-    document.getElementById('opt-yes').innerText = t.optYes;
-    document.getElementById('btn-submit').innerText = t.btnSubmit;
+                    <input
+                        type="number"
+                        id="loan_int_rate"
+                        min="5.42"
+                        max="20"
+                        step="0.01"
+                        required
+                    >
 
-    document.getElementById('result').style.display = 'none';
-}
+                    <span class="field-hint" id="hint-rate">
+                        לדוגמה: 11.50
+                    </span>
+                </div>
 
-document.getElementById('loanForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const resultDiv = document.getElementById('result');
-    resultDiv.style.display = 'none';
+                <div class="form-group">
+                    <label for="loan_percent_income" id="label-percent">
+                        ⚡ יחס הלוואה להכנסה
+                    </label>
 
-    const payload = {
-        person_age: document.getElementById('person_age').value,
-        person_income: document.getElementById('person_income').value,
-        person_emp_exp: document.getElementById('person_emp_exp').value,
-        loan_amnt: document.getElementById('loan_amnt').value,
-        loan_int_rate: document.getElementById('loan_int_rate').value,
-        loan_percent_income: document.getElementById('loan_percent_income').value,
-        previous_loan_defaults: document.getElementById('previous_loan_defaults').value
-    };
+                    <input
+                        type="text"
+                        id="loan_percent_income"
+                        readonly
+                        tabindex="-1"
+                    >
 
-    try {
-        const response = await fetch('/api/model/predict', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
+                    <span class="field-hint" id="hint-percent">
+                        מחושב אוטומטית ואינו נשלח כקלט ידני
+                    </span>
+                </div>
 
-        const data = await response.json();
-        const t = i18n[currentLang];
+                <div class="form-group">
+                    <label
+                        for="previous_loan_defaults_on_file"
+                        id="label-defaults"
+                    >
+                        ⚠️ כשל קודם בהחזר הלוואה?
+                    </label>
 
-        if (response.ok) {
-            resultDiv.style.display = 'block';
-            if (data.approved) {
-                resultDiv.className = 'result-card approved';
-                resultDiv.innerHTML = `<div>${t.approvedTitle}</div><div class="result-desc">${t.approvedDesc}</div>`;
-            } else {
-                resultDiv.className = 'result-card rejected';
-                resultDiv.innerHTML = `<div>${t.rejectedTitle}</div><div class="result-desc">${t.rejectedDesc}</div>`;
+                    <select
+                        id="previous_loan_defaults_on_file"
+                        required
+                    >
+                        <option value="0" id="option-no">לא</option>
+                        <option value="1" id="option-yes">כן</option>
+                    </select>
+
+                    <span class="field-hint" id="hint-defaults">
+                        בחרו לפי היסטוריית ההלוואות
+                    </span>
+                </div>
+            </div>
+
+            <button
+                type="submit"
+                class="btn-submit"
+                id="submit-button"
+            >
+                🚀 בדוק זכאות עכשיו
+            </button>
+        </form>
+
+        <section
+            id="result"
+            class="result-card"
+            aria-live="polite"
+        ></section>
+    </main>
+
+    <script>
+        let currentLanguage = "he";
+
+        const translations = {
+            he: {
+                title: "בדיקת זכאות להלוואה",
+                subtitle: "הזינו את פרטי המבקש לקבלת תחזית המבוססת על מודל למידת מכונה",
+                dashboard: "מדדי המודל",
+                age: "🎂 גיל המבקש",
+                income: "💵 הכנסה שנתית ($)",
+                amount: "💰 סכום ההלוואה ($)",
+                rate: "📈 שיעור ריבית (%)",
+                percent: "⚡ יחס הלוואה להכנסה",
+                defaults: "⚠️ כשל קודם בהחזר הלוואה?",
+                no: "לא",
+                yes: "כן",
+                ageHint: "טווח מומלץ: 20–80",
+                incomeHint: "יש להזין הכנסה שנתית",
+                amountHint: "טווח נתוני האימון: 500–35,000",
+                rateHint: "לדוגמה: 11.50",
+                percentHint: "מחושב אוטומטית ואינו נשלח כקלט ידני",
+                defaultsHint: "בחרו לפי היסטוריית ההלוואות",
+                submit: "🚀 בדוק זכאות עכשיו",
+                loading: "בודק את הבקשה...",
+                approvedTitle: "🎉 ההלוואה אושרה",
+                approvedDescription: "המודל סיווג את הבקשה כמחלקה 1.",
+                rejectedTitle: "❌ ההלוואה לא אושרה",
+                rejectedDescription: "המודל סיווג את הבקשה כמחלקה 0.",
+                ratioTitle: "יחס הלוואה להכנסה:",
+                probabilityTitle: "הסתברות למחלקה שנבחרה:",
+                reasonsTitle: "מדדים רלוונטיים:",
+                recommendationsTitle: "המלצות:",
+                errorTitle: "⚠️ לא ניתן להשלים את הבדיקה",
+                errorDescription: "תקנו את השדות המסומנים ונסו שוב.",
+                networkError: "לא ניתן להתחבר לשרת כרגע."
+            },
+
+            en: {
+                title: "Loan Eligibility Checker",
+                subtitle: "Enter the applicant details to receive a machine-learning prediction",
+                dashboard: "Model Metrics",
+                age: "🎂 Applicant Age",
+                income: "💵 Annual Income ($)",
+                amount: "💰 Loan Amount ($)",
+                rate: "📈 Interest Rate (%)",
+                percent: "⚡ Loan-to-Income Ratio",
+                defaults: "⚠️ Previous Loan Default?",
+                no: "No",
+                yes: "Yes",
+                ageHint: "Recommended range: 20–80",
+                incomeHint: "Enter the annual income",
+                amountHint: "Training-data range: 500–35,000",
+                rateHint: "For example: 11.50",
+                percentHint: "Calculated automatically and not sent as manual input",
+                defaultsHint: "Select according to the loan history",
+                submit: "🚀 Check Eligibility",
+                loading: "Checking the application...",
+                approvedTitle: "🎉 Loan approved",
+                approvedDescription: "The model classified the application as class 1.",
+                rejectedTitle: "❌ Loan not approved",
+                rejectedDescription: "The model classified the application as class 0.",
+                ratioTitle: "Loan-to-income ratio:",
+                probabilityTitle: "Predicted-class probability:",
+                reasonsTitle: "Relevant indicators:",
+                recommendationsTitle: "Recommendations:",
+                errorTitle: "⚠️ Unable to complete the check",
+                errorDescription: "Correct the highlighted fields and try again.",
+                networkError: "The server is currently unavailable."
             }
-        } else {
-            alert('Error: ' + data.error);
-        }
-    } catch (err) {
-        alert('Failed to connect to server.');
-    }
-});
+        };
 
-autoCalculatePercent();
-</script>
+        const elements = {
+            form: document.getElementById("loan-form"),
+            result: document.getElementById("result"),
+            submit: document.getElementById("submit-button"),
+            age: document.getElementById("person_age"),
+            income: document.getElementById("person_income"),
+            amount: document.getElementById("loan_amnt"),
+            rate: document.getElementById("loan_int_rate"),
+            ratio: document.getElementById("loan_percent_income"),
+            defaults: document.getElementById(
+                "previous_loan_defaults_on_file"
+            )
+        };
+
+        function escapeHtml(value) {
+            const element = document.createElement("div");
+            element.textContent = String(value ?? "");
+            return element.innerHTML;
+        }
+
+        function listHtml(items) {
+            return (items || [])
+                .map(item => `<li>${escapeHtml(item)}</li>`)
+                .join("");
+        }
+
+        function calculateRatio() {
+            const income = Number(elements.income.value);
+            const amount = Number(elements.amount.value);
+
+            if (income > 0 && amount >= 0) {
+                elements.ratio.value =
+                    `${((amount / income) * 100).toFixed(2)}%`;
+            } else {
+                elements.ratio.value = "";
+            }
+        }
+
+        function setLanguage(language) {
+            currentLanguage = language;
+            const text = translations[language];
+
+            document.documentElement.lang = language;
+            document.documentElement.dir =
+                language === "he" ? "rtl" : "ltr";
+
+            document
+                .querySelectorAll(".lang-btn")
+                .forEach(button => {
+                    button.classList.toggle(
+                        "active",
+                        button.dataset.language === language
+                    );
+                });
+
+            document.getElementById("txt-title").textContent =
+                text.title;
+
+            document.getElementById("txt-subtitle").textContent =
+                text.subtitle;
+
+            document.getElementById("txt-dash-btn").textContent =
+                text.dashboard;
+
+            document.getElementById("label-age").textContent =
+                text.age;
+
+            document.getElementById("label-income").textContent =
+                text.income;
+
+            document.getElementById("label-amount").textContent =
+                text.amount;
+
+            document.getElementById("label-rate").textContent =
+                text.rate;
+
+            document.getElementById("label-percent").textContent =
+                text.percent;
+
+            document.getElementById("label-defaults").textContent =
+                text.defaults;
+
+            document.getElementById("option-no").textContent =
+                text.no;
+
+            document.getElementById("option-yes").textContent =
+                text.yes;
+
+            document.getElementById("hint-age").textContent =
+                text.ageHint;
+
+            document.getElementById("hint-income").textContent =
+                text.incomeHint;
+
+            document.getElementById("hint-amount").textContent =
+                text.amountHint;
+
+            document.getElementById("hint-rate").textContent =
+                text.rateHint;
+
+            document.getElementById("hint-percent").textContent =
+                text.percentHint;
+
+            document.getElementById("hint-defaults").textContent =
+                text.defaultsHint;
+
+            elements.submit.textContent = text.submit;
+            elements.result.style.display = "none";
+        }
+
+        function showError(data) {
+            const text = translations[currentLanguage];
+            const fieldMessages = Object.values(
+                data.field_errors || {}
+            );
+
+            const messages = fieldMessages.length
+                ? fieldMessages
+                : [data.error || text.errorDescription];
+
+            elements.result.className =
+                "result-card validation-error";
+
+            elements.result.innerHTML = `
+                <div>${text.errorTitle}</div>
+
+                <div class="result-desc">
+                    ${escapeHtml(data.error || text.errorDescription)}
+                </div>
+
+                <div class="result-section">
+                    <ul>${listHtml(messages)}</ul>
+                </div>
+            `;
+
+            elements.result.style.display = "block";
+        }
+
+        function showPrediction(data) {
+            const text = translations[currentLanguage];
+            const approved = data.approved === true;
+            const reasons = listHtml(data.reasons);
+            const recommendations = listHtml(data.recommendations);
+
+            elements.result.className =
+                `result-card ${approved ? "approved" : "rejected"}`;
+
+            elements.result.innerHTML = `
+                <div>
+                    ${approved
+                        ? text.approvedTitle
+                        : text.rejectedTitle}
+                </div>
+
+                <div class="result-desc">
+                    ${approved
+                        ? text.approvedDescription
+                        : text.rejectedDescription}
+                </div>
+
+                <div class="result-section">
+                    <strong>${text.ratioTitle}</strong>
+                    <ul>
+                        <li>
+                            ${Number(
+                                data.loan_percent_income_display
+                            ).toFixed(2)}%
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="result-section">
+                    <strong>${text.probabilityTitle}</strong>
+                    <ul>
+                        <li>
+                            ${Number(
+                                data.prediction_probability
+                            ).toFixed(2)}%
+                        </li>
+                    </ul>
+                </div>
+
+                ${
+                    reasons
+                        ? `
+                            <div class="result-section">
+                                <strong>${text.reasonsTitle}</strong>
+                                <ul>${reasons}</ul>
+                            </div>
+                        `
+                        : ""
+                }
+
+                ${
+                    recommendations
+                        ? `
+                            <div class="result-section">
+                                <strong>
+                                    ${text.recommendationsTitle}
+                                </strong>
+                                <ul>${recommendations}</ul>
+                            </div>
+                        `
+                        : ""
+                }
+
+                <div class="result-note">
+                    ${escapeHtml(data.explanation_note || "")}
+                </div>
+            `;
+
+            elements.result.style.display = "block";
+        }
+
+        document
+            .querySelectorAll(".lang-btn")
+            .forEach(button => {
+                button.addEventListener("click", () => {
+                    setLanguage(button.dataset.language);
+                });
+            });
+
+        elements.income.addEventListener(
+            "input",
+            calculateRatio
+        );
+
+        elements.amount.addEventListener(
+            "input",
+            calculateRatio
+        );
+
+        elements.form.addEventListener(
+            "submit",
+            async event => {
+                event.preventDefault();
+
+                if (!elements.form.reportValidity()) {
+                    return;
+                }
+
+                const text = translations[currentLanguage];
+
+                elements.submit.disabled = true;
+                elements.result.className = "result-card";
+                elements.result.innerHTML =
+                    `<div>${text.loading}</div>`;
+                elements.result.style.display = "block";
+
+                const payload = {
+                    person_age: elements.age.value,
+                    person_income: elements.income.value,
+                    loan_amnt: elements.amount.value,
+                    loan_int_rate: elements.rate.value,
+                    previous_loan_defaults_on_file:
+                        elements.defaults.value,
+                    language: currentLanguage
+                };
+
+                try {
+                    const response = await fetch(
+                        "/api/model/predict",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify(payload)
+                        }
+                    );
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        showError(data);
+                        return;
+                    }
+
+                    showPrediction(data);
+                } catch (error) {
+                    showError({
+                        error: text.networkError
+                    });
+                } finally {
+                    elements.submit.disabled = false;
+                }
+            }
+        );
+
+        calculateRatio();
+    </script>
 </body>
 </html>
