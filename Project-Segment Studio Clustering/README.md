@@ -1,4 +1,4 @@
-# Segment Studio — Customer Clustering System 🚀
+# Segment Studio — Unsupervised Data Clustering System 🚀
 
 <p align="center">
   <img src="segment_studio_banner.png" alt="Segment Studio banner" width="760">
