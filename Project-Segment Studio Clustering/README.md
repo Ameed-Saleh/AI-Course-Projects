@@ -12,7 +12,7 @@
 
 **סטודיו לפילוח** הוא אתר אינטראקטיבי להעלאת קובצי CSV ללא עמודת מטרה, בחירת פיצ'רים, זיהוי קבוצות דומות, יצירת שמות והורדת התוצאה.
 
-### ## 🌐 Render Deployment / Live Application 
+## 🌐 Render Deployment / Live Application 
 
 The application has been successfully deployed on Render.
 
