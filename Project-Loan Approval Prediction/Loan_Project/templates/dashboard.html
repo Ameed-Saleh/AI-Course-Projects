@@ -856,7 +856,7 @@
                 <div class="card-header">
                     <div>
                         <div class="card-title"><i class="fa-solid fa-chart-scatter"></i><span id="scatter-title">מפת תחזיות לפי יחס הלוואה וריבית</span></div>
-                        <p class="card-description" id="scatter-description">כל נקודה היא בקשה מקבוצת הבדיקה. הצבע מייצג את התחזית של המודל; הגרף מציג הקרנה של שני פיצ’רים בלבד ואינו גבול ההחלטה המלא של SVC.</p>
+                        <p class="card-description" id="scatter-description">המחשה באמצעות מודל SVC ליניארי נפרד על שני רכיבי PCA של שבעת המאפיינים. הקו, השוליים, צבעי הנקודות ווקטורי התמיכה שייכים למודל ההמחשה; זה אינו גבול ההחלטה של מודל ה-RBF הראשי שמחזיר את התחזיות באתר.</p>
                     </div>
                     <span class="pill" id="scatter-pill">TEST SET</span>
                 </div>
@@ -878,10 +878,10 @@
             <article class="card">
                 <div class="card-header">
                     <div>
-                        <div class="card-title"><i class="fa-solid fa-sliders"></i><span id="features-title">ששת הפיצ’רים של המודל</span></div>
+                        <div class="card-title"><i class="fa-solid fa-sliders"></i><span id="features-title">שבעת הפיצ’רים של המודל</span></div>
                         <p class="card-description" id="features-description">אלה העמודות שנכנסות ל-Pipeline בזמן האימון ובזמן החיזוי באתר.</p>
                     </div>
-                    <span class="pill">6 FEATURES</span>
+                    <span class="pill">7 FEATURES</span>
                 </div>
 
                 <div class="features-grid">
@@ -890,6 +890,7 @@
                     <div class="feature"><div class="feature-icon"><i class="fa-solid fa-hand-holding-dollar"></i></div><div><div class="feature-name">loan_amnt</div><div class="feature-description" id="feature-amount">סכום ההלוואה המבוקש</div></div></div>
                     <div class="feature"><div class="feature-icon"><i class="fa-solid fa-percent"></i></div><div><div class="feature-name">loan_int_rate</div><div class="feature-description" id="feature-rate">שיעור הריבית של ההלוואה</div></div></div>
                     <div class="feature"><div class="feature-icon"><i class="fa-solid fa-chart-line"></i></div><div><div class="feature-name">loan_percent_income</div><div class="feature-description" id="feature-ratio">יחס סכום ההלוואה להכנסה</div></div></div>
+                    <div class="feature"><div class="feature-icon"><i class="fa-solid fa-credit-card"></i></div><div><div class="feature-name">credit_score</div><div class="feature-description" id="feature-credit">ציון האשראי של המבקש</div></div></div>
                     <div class="feature"><div class="feature-icon"><i class="fa-solid fa-clock-rotate-left"></i></div><div><div class="feature-name">previous_loan_defaults_on_file</div><div class="feature-description" id="feature-default">האם קיים כשל קודם בהחזר הלוואה</div></div></div>
                 </div>
             </article>
@@ -910,6 +911,7 @@
                     <div class="detail"><span class="detail-label"><i class="fa-solid fa-ruler-combined"></i><span id="scaler-label">נרמול</span></span><span class="detail-value">StandardScaler</span></div>
                     <div class="detail"><span class="detail-label"><i class="fa-solid fa-code-branch"></i><span id="split-label">חלוקת נתונים</span></span><span class="detail-value">80% / 20%</span></div>
                     <div class="detail"><span class="detail-label"><i class="fa-solid fa-crosshairs"></i><span id="stratify-label">Stratified split</span></span><span class="detail-value">True</span></div>
+                    <div class="detail"><span class="detail-label"><i class="fa-solid fa-tags"></i><span id="target-label">מיפוי יעד</span></span><span class="detail-value" id="target-value">0 = נדחה, 1 = מאושר</span></div>
                     <div class="detail"><span class="detail-label"><i class="fa-solid fa-circle-nodes"></i><span id="vectors-label">Support Vectors</span></span><span class="detail-value" id="vectors-value">--</span></div>
                     <div class="detail"><span class="detail-label"><i class="fa-solid fa-file-code"></i><span id="model-file-label">קובץ מודל</span></span><span class="detail-value">loan_svc_model_v1.0.pkl</span></div>
                 </div>
@@ -997,7 +999,7 @@
 
             <div class="table-wrap">
                 <table class="data-table">
-                    <thead><tr><th id="table-age">גיל</th><th id="table-income">הכנסה</th><th id="table-amount">סכום הלוואה</th><th id="table-rate">ריבית</th><th id="table-ratio">יחס הלוואה להכנסה</th><th id="table-default">כשל קודם</th><th id="table-status">מחלקה</th></tr></thead>
+                    <thead><tr><th id="table-age">גיל</th><th id="table-income">הכנסה</th><th id="table-amount">סכום הלוואה</th><th id="table-rate">ריבית</th><th id="table-ratio">יחס הלוואה להכנסה</th><th id="table-credit">ציון אשראי</th><th id="table-default">כשל קודם</th><th id="table-status">מחלקה</th></tr></thead>
                     <tbody id="samples-body"></tbody>
                 </table>
             </div>
@@ -1063,16 +1065,17 @@
                 samples: "מספר דגימות",
                 samplesNote: "80% אימון ו-20% בדיקה",
                 scatterTitle: "גבול החלטה של SVM — הקרנה דו־ממדית",
-                scatterDescription: "הקרנת PCA של ששת הפיצ’רים. הקו הרציף הוא גבול ההחלטה, הקווים המקווקווים הם השוליים והעיגולים החלולים הם וקטורי התמיכה.",
+                scatterDescription: "המחשה באמצעות מודל SVC ליניארי נפרד על שני רכיבי PCA של שבעת המאפיינים. הקו, השוליים, צבעי הנקודות ווקטורי התמיכה שייכים למודל ההמחשה; זה אינו גבול ההחלטה של מודל ה-RBF הראשי שמחזיר את התחזיות באתר.",
                 distributionTitle: "התפלגות מחלקות הבדיקה",
                 distributionDescription: "הגרף מראה כמה רשומות אמיתיות שייכות לכל מחלקה וממחיש את חוסר האיזון בנתונים.",
-                featuresTitle: "ששת הפיצ’רים של המודל",
+                featuresTitle: "שבעת הפיצ’רים של המודל",
                 featuresDescription: "אלה העמודות שנכנסות ל-Pipeline בזמן האימון ובזמן החיזוי באתר.",
                 featureAge: "גיל מבקש ההלוואה",
                 featureIncome: "הכנסה שנתית של המבקש",
                 featureAmount: "סכום ההלוואה המבוקש",
                 featureRate: "שיעור הריבית של ההלוואה",
                 featureRatio: "יחס סכום ההלוואה להכנסה",
+                featureCredit: "ציון האשראי של המבקש",
                 featureDefault: "האם קיים כשל קודם בהחזר הלוואה",
                 detailsTitle: "פרטי המודל",
                 detailsDescription: "הגדרות האימון שנשמרו בתוך קובץ ה-Pipeline.",
@@ -1083,6 +1086,8 @@
                 scaler: "נרמול",
                 split: "חלוקת נתונים",
                 stratify: "Stratified split",
+                targetMapping: "מיפוי יעד",
+                targetValue: "0 = נדחה, 1 = מאושר",
                 vectors: "Support Vectors",
                 modelFile: "קובץ מודל",
                 matrixTitle: "מטריצת בלבול",
@@ -1119,6 +1124,7 @@
                 tableAmount: "סכום הלוואה",
                 tableRate: "ריבית",
                 tableRatio: "יחס הלוואה להכנסה",
+                tableCredit: "ציון אשראי",
                 tableDefault: "כשל קודם",
                 tableStatus: "מחלקה",
                 yes: "כן",
@@ -1163,16 +1169,17 @@
                 samples: "Dataset Samples",
                 samplesNote: "80% training and 20% testing",
                 scatterTitle: "SVM Decision Boundary — 2D Projection",
-                scatterDescription: "PCA projection of all six features. The solid line is the decision boundary, dashed lines are the margins, and hollow circles mark support vectors.",
+                scatterDescription: "Illustration using a separate linear SVC on two PCA components of the seven features. The line, margins, point colors and support vectors belong to that illustrative model, not to the main RBF model used for website predictions.",
                 distributionTitle: "Test-Class Distribution",
                 distributionDescription: "The chart shows how many real records belong to each class and highlights the class imbalance.",
-                featuresTitle: "The Model’s Six Features",
+                featuresTitle: "The Model’s Seven Features",
                 featuresDescription: "These columns enter the Pipeline during training and during website predictions.",
                 featureAge: "Applicant age",
                 featureIncome: "Applicant annual income",
                 featureAmount: "Requested loan amount",
                 featureRate: "Loan interest rate",
                 featureRatio: "Loan amount divided by income",
+                featureCredit: "Applicant credit score",
                 featureDefault: "Whether a previous loan default exists",
                 detailsTitle: "Model Details",
                 detailsDescription: "Training settings stored inside the saved Pipeline.",
@@ -1183,6 +1190,8 @@
                 scaler: "Scaling",
                 split: "Data Split",
                 stratify: "Stratified Split",
+                targetMapping: "Target Mapping",
+                targetValue: "0 = Rejected, 1 = Approved",
                 vectors: "Support Vectors",
                 modelFile: "Model File",
                 matrixTitle: "Confusion Matrix",
@@ -1219,6 +1228,7 @@
                 tableAmount: "Loan Amount",
                 tableRate: "Interest Rate",
                 tableRatio: "Loan / Income",
+                tableCredit: "Credit Score",
                 tableDefault: "Previous Default",
                 tableStatus: "Class",
                 yes: "Yes",
@@ -1273,6 +1283,7 @@
             "feature-amount": "featureAmount",
             "feature-rate": "featureRate",
             "feature-ratio": "featureRatio",
+            "feature-credit": "featureCredit",
             "feature-default": "featureDefault",
             "details-title": "detailsTitle",
             "details-description": "detailsDescription",
@@ -1283,6 +1294,8 @@
             "scaler-label": "scaler",
             "split-label": "split",
             "stratify-label": "stratify",
+            "target-label": "targetMapping",
+            "target-value": "targetValue",
             "vectors-label": "vectors",
             "model-file-label": "modelFile",
             "matrix-title": "matrixTitle",
@@ -1319,6 +1332,7 @@
             "table-amount": "tableAmount",
             "table-rate": "tableRate",
             "table-ratio": "tableRatio",
+            "table-credit": "tableCredit",
             "table-default": "tableDefault",
             "table-status": "tableStatus",
             "api-title": "apiTitle",
@@ -1374,6 +1388,7 @@
             const colors = chartColors();
             const decisionMap = dashboardData.decision_map || {};
             const rows = decisionMap.points || dashboardData.chart_data || [];
+            const marginRows = dashboardData.chart_data || [];
             const classZeroRows = sampledRows(rows.filter(row => row.prediction === 0), 120);
             const classOneRows = sampledRows(rows.filter(row => row.prediction === 1), 120);
             const visibleSupportVectors = sampledRows(
@@ -1542,7 +1557,9 @@
                 }
             });
 
-            const margins = rows.map(row => row.margin).filter(value => Number.isFinite(value));
+            const margins = marginRows
+                .map(row => Number(row.margin))
+                .filter(value => Number.isFinite(value));
             const binCount = 16;
             const minimum = margins.length ? Math.min(...margins) : -2;
             const maximum = margins.length ? Math.max(...margins) : 2;
@@ -1612,6 +1629,7 @@
                     Number(row.loan_amnt).toLocaleString(),
                     Number(row.loan_int_rate).toFixed(2),
                     `${(Number(row.loan_percent_income) * 100).toFixed(2)}%`,
+                    Number(row.credit_score).toLocaleString(),
                     String(row.previous_loan_defaults_on_file).toLowerCase() === "yes" ? text.yes : text.no
                 ];
 

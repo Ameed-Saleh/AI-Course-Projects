@@ -1,3 +1,9 @@
+"""Flask application for inspecting and using the loan-approval model.
+
+The target mapping follows the dataset documentation: 1 means approved and
+0 means rejected. The saved Pipeline performs scaling and prediction together.
+"""
+
 import json
 import logging
 import os
@@ -7,6 +13,7 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.utils
+from feature_processing import loan_to_income_ratio
 from flask import Flask, jsonify, render_template, request, send_file
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, f1_score, precision_score, recall_score
 from sklearn.model_selection import train_test_split
@@ -32,6 +39,7 @@ FEATURES = [
     "loan_amnt",
     "loan_int_rate",
     "loan_percent_income",
+    "credit_score",
     "previous_loan_defaults_on_file",
 ]
 NUMERIC_INPUTS = [
@@ -39,6 +47,7 @@ NUMERIC_INPUTS = [
     "person_income",
     "loan_amnt",
     "loan_int_rate",
+    "credit_score",
 ]
 TARGET_COLUMN = "loan_status"
 
@@ -47,18 +56,21 @@ metrics_cache = {}
 sample_data = []
 validation_ranges = {}
 validation_medians = {}
+validation_ready = False
 chart_data_cache = []
 decision_map_cache = {}
 
 
 @app.after_request
 def disable_browser_cache(response):
+    """Prevent stale dashboard and prediction responses in the browser."""
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     response.headers["Pragma"] = "no-cache"
     return response
 
 
 def encode_defaults(series):
+    """Convert the dataset's Yes/No default-history values to integers."""
     normalized = series.astype(str).str.strip().str.title()
     encoded = normalized.map({"No": 0, "Yes": 1})
     if encoded.isna().any():
@@ -68,7 +80,10 @@ def encode_defaults(series):
 
 
 def load_model_and_compute_metrics():
-    global model, metrics_cache, sample_data, validation_ranges, validation_medians, chart_data_cache, decision_map_cache
+    """Load the persisted pipeline and cache dataset-derived dashboard data."""
+    global model, metrics_cache, sample_data, validation_ranges, validation_medians, chart_data_cache, decision_map_cache, validation_ready
+    validation_ready = False
+    validation_ranges = {}
 
     if not os.path.exists(MODEL_PATH):
         app.logger.error("Model file not found at %s", MODEL_PATH)
@@ -84,7 +99,7 @@ def load_model_and_compute_metrics():
 
     if not os.path.exists(DATA_PATH):
         app.logger.warning("Dataset file not found at %s", DATA_PATH)
-        return True
+        return False
 
     try:
         df = pd.read_csv(DATA_PATH)
@@ -97,6 +112,11 @@ def load_model_and_compute_metrics():
         data = df[FEATURES + [TARGET_COLUMN]].dropna().copy()
         if data.empty:
             raise ValueError("Dataset has no complete rows")
+        if (data["person_income"] <= 0).any():
+            raise ValueError("Income must be positive to calculate the loan ratio")
+        data["loan_percent_income"] = loan_to_income_ratio(
+            data["loan_amnt"], data["person_income"]
+        )
 
         raw_samples = data.head(5).copy()
         sample_data = raw_samples.to_dict(orient="records")
@@ -150,7 +170,7 @@ def load_model_and_compute_metrics():
         ]
 
         # A dedicated two-dimensional projection for the dashboard. The production
-        # model remains the six-feature RBF SVC loaded above; this linear SVC exists
+        # model remains the seven-feature RBF SVC loaded above; this linear SVC exists
         # only to make its class separation easy to understand visually.
         scaler = model.named_steps["scaler"]
         train_scaled = scaler.transform(X_train)
@@ -171,6 +191,7 @@ def load_model_and_compute_metrics():
         intercept = visual_svc.intercept_[0]
 
         def boundary_line(level):
+            """Return visible points for one linear decision or margin line."""
             if abs(weight_y) < 1e-9:
                 x_value = (level - intercept) / weight_x
                 return [{"x": round(float(x_value), 4), "y": round(float(y_min), 4)},
@@ -249,6 +270,7 @@ def load_model_and_compute_metrics():
             },
         }
         app.logger.info("Model metrics calculated successfully")
+        validation_ready = True
         return True
     except Exception:
         app.logger.exception("Could not compute model metrics")
@@ -256,15 +278,18 @@ def load_model_and_compute_metrics():
 
 
 def localizer(language):
+    """Return a small helper that selects Hebrew or English response text."""
     is_hebrew = str(language).lower().startswith("he")
 
     def localized(hebrew_text, english_text):
+        """Choose a localized string for the current request language."""
         return hebrew_text if is_hebrew else english_text
 
     return localized
 
 
 def error_response(localized, message_he, message_en, status_code=422, field_errors=None):
+    """Build a consistent localized JSON error response."""
     return jsonify({
         "status": "error",
         "error": localized(message_he, message_en),
@@ -273,6 +298,7 @@ def error_response(localized, message_he, message_en, status_code=422, field_err
 
 
 def parse_numeric_inputs(payload, localized):
+    """Parse all required numeric fields and reject missing or non-finite values."""
     missing_fields = [field for field in NUMERIC_INPUTS if payload.get(field) in (None, "")]
     if missing_fields:
         field_errors = {
@@ -289,7 +315,7 @@ def parse_numeric_inputs(payload, localized):
 
     try:
         values = {field: float(payload[field]) for field in NUMERIC_INPUTS}
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         response = error_response(
             localized,
             "יש להזין מספרים תקינים בלבד.",
@@ -311,10 +337,24 @@ def parse_numeric_inputs(payload, localized):
         )
         return None, response
 
+    integer_errors = {
+        field: localized("יש להזין מספר שלם.", "Enter a whole number.")
+        for field in ("person_age", "credit_score")
+        if not values[field].is_integer()
+    }
+    if integer_errors:
+        return None, error_response(
+            localized,
+            "גיל וציון אשראי חייבים להיות מספרים שלמים.",
+            "Age and credit score must be whole numbers.",
+            field_errors=integer_errors,
+        )
+
     return values, None
 
 
 def parse_previous_default(payload, localized):
+    """Parse the previous-default field from common Boolean representations."""
     raw_value = payload.get(
         "previous_loan_defaults_on_file",
         payload.get("previous_loan_defaults"),
@@ -357,14 +397,40 @@ def parse_previous_default(payload, localized):
     return mapping[normalized], None
 
 
+def validation_metadata_available():
+    """Require complete, finite ranges before serving the prediction form."""
+    if not validation_ready:
+        return False
+    for field in NUMERIC_INPUTS + ["loan_percent_income"]:
+        limits = validation_ranges.get(field, {})
+        low, high = limits.get("min"), limits.get("max")
+        if low is None or high is None or not np.isfinite([low, high]).all() or low > high:
+            return False
+    return True
+
+
+def input_ranges():
+    """Apply the same age policy to server validation and the rendered form."""
+    ranges = {field: dict(limits) for field, limits in validation_ranges.items()}
+    ranges["person_age"] = {"min": 20, "max": 80}
+    return ranges
+
+
 def validate_input_ranges(values, localized):
+    """Reject values outside the shared input policy, including the derived ratio."""
     errors = {}
 
     for field, value in values.items():
-        limits = validation_ranges.get(field)
+        limits = input_ranges().get(field)
         if not limits:
             continue
         if value < limits["min"] or value > limits["max"]:
+            if field == "loan_percent_income":
+                errors[field] = localized(
+                    f"יחס ההלוואה להכנסה חייב להיות בין {limits['min'] * 100:.4f}% ל-{limits['max'] * 100:.4f}%. שנו את ההכנסה או סכום ההלוואה.",
+                    f"Loan-to-income ratio must be between {limits['min'] * 100:.4f}% and {limits['max'] * 100:.4f}%. Adjust income or loan amount.",
+                )
+                continue
             errors[field] = localized(
                 f"הערך חייב להיות בין {limits['min']:,.2f} ל-{limits['max']:,.2f}.",
                 f"The value must be between {limits['min']:,.2f} and {limits['max']:,.2f}.",
@@ -373,8 +439,8 @@ def validate_input_ranges(values, localized):
     if errors:
         return error_response(
             localized,
-            "חלק מהערכים נמצאים מחוץ לטווח שעליו המודל אומן.",
-            "Some values are outside the range used to train the model.",
+            "חלק מהערכים נמצאים מחוץ לטווח המותר.",
+            "Some values are outside the allowed range.",
             field_errors=errors,
         )
 
@@ -382,6 +448,7 @@ def validate_input_ranges(values, localized):
 
 
 def build_explanation(values, has_default, ratio, localized):
+    """Create plain-language indicators and recommendations for a prediction."""
     reasons = []
     recommendations = []
 
@@ -421,10 +488,20 @@ def build_explanation(values, has_default, ratio, localized):
             "Check whether a lower interest rate is available.",
         ))
 
+    if values["credit_score"] < validation_medians.get("credit_score", values["credit_score"]):
+        reasons.append(localized(
+            "ציון האשראי נמוך מחציון ציוני האשראי בנתוני האימון.",
+            "The credit score is below the training-data median.",
+        ))
+        recommendations.append(localized(
+            "מומלץ לבדוק דרכים לשיפור ציון האשראי.",
+            "Consider steps that may improve the credit score.",
+        ))
+
     if not reasons:
         reasons.append(localized(
-            "התחזית מבוססת על השילוב בין כל ששת הפיצ'רים.",
-            "The prediction is based on the combination of all six features.",
+            "התחזית מבוססת על השילוב בין כל שבעת המאפיינים.",
+            "The prediction is based on the combination of all seven features.",
         ))
 
     if not recommendations:
@@ -441,16 +518,18 @@ load_model_and_compute_metrics()
 
 @app.route("/")
 def home():
-    if model is None:
+    """Render the loan-eligibility form or a model-loading error."""
+    if model is None or not validation_metadata_available():
         return render_template(
             "error.html",
-            message="Model file not found. Train and save the model first.",
+            message="Model or validation data unavailable. Check the model and dataset files.",
         ), 503
-    return render_template("index.html")
+    return render_template("index.html", input_ranges=input_ranges())
 
 
 @app.route("/dashboard")
 def dashboard():
+    """Render the model analytics dashboard or a model-loading error."""
     if model is None:
         return render_template(
             "error.html",
@@ -461,6 +540,7 @@ def dashboard():
 
 @app.route("/api/model/info", methods=["GET"])
 def get_model_info():
+    """Return model configuration, metrics, samples, and visualization data."""
     if model is None:
         return jsonify({"error": "Model not loaded"}), 404
 
@@ -470,6 +550,7 @@ def get_model_info():
         "c_parameter": 1.0,
         "feature_count": len(FEATURES),
         "feature_names": FEATURES,
+        "target_mapping": {"0": "Rejected", "1": "Approved"},
         "metrics": metrics_cache,
         "samples": sample_data,
         "chart_data": chart_data_cache,
@@ -480,6 +561,7 @@ def get_model_info():
 
 @app.route("/api/metrics-chart", methods=["GET"])
 def get_metrics_chart():
+    """Return a Plotly bar-chart specification for per-class metrics."""
     if not metrics_cache:
         return jsonify({"error": "Metrics not loaded"}), 404
 
@@ -526,6 +608,7 @@ def get_metrics_chart():
 
 @app.route("/download/model", methods=["GET"])
 def download_model():
+    """Download the trained Pipeline as a pickle file."""
     if not os.path.exists(MODEL_PATH):
         return jsonify({"error": "Model file not found"}), 404
     return send_file(
@@ -538,6 +621,7 @@ def download_model():
 @app.route("/predict", methods=["POST"])
 @app.route("/api/model/predict", methods=["POST"])
 def predict():
+    """Validate a JSON request, run the pipeline, and return an explanation."""
     if model is None:
         return jsonify({"status": "error", "error": "Model not loaded"}), 503
 
@@ -546,6 +630,14 @@ def predict():
         return jsonify({"status": "error", "error": "A valid JSON request body is required"}), 400
 
     localized = localizer(payload.get("language", "he"))
+
+    if not validation_metadata_available():
+        return error_response(
+            localized,
+            "נתוני בדיקת הקלט אינם זמינים כרגע. לא ניתן לבצע חיזוי.",
+            "Input validation data is unavailable. Prediction is disabled.",
+            status_code=503,
+        )
 
     values, numeric_error = parse_numeric_inputs(payload, localized)
     if numeric_error:
@@ -578,7 +670,10 @@ def predict():
             field_errors={"loan_amnt": localized("הזינו ערך גדול מאפס.", "Enter a value greater than zero.")},
         )
 
-    ratio = loan_amount / income
+    ratio = loan_to_income_ratio(loan_amount, income)
+    ratio_error = validate_input_ranges({"loan_percent_income": ratio}, localized)
+    if ratio_error:
+        return ratio_error
 
     model_input = pd.DataFrame([{
         "person_age": values["person_age"],
@@ -586,6 +681,7 @@ def predict():
         "loan_amnt": loan_amount,
         "loan_int_rate": values["loan_int_rate"],
         "loan_percent_income": ratio,
+        "credit_score": values["credit_score"],
         "previous_loan_defaults_on_file": has_default,
     }], columns=FEATURES)
 
@@ -604,6 +700,7 @@ def predict():
             status_code=500,
         )
 
+    # Dataset definition: 1 = approved, 0 = rejected.
     approved = prediction == 1
     result_text = "Approved" if approved else "Rejected"
     reasons, recommendations = build_explanation(values, has_default, ratio, localized)
@@ -622,8 +719,10 @@ def predict():
         "reasons": reasons,
         "recommendations": recommendations,
         "explanation_note": localized(
-            "התוצאה היא תחזית של המודל ואינה התחייבות לאישור הלוואה.",
-            "The result is a model prediction and does not guarantee loan approval.",
+            "לפי תיעוד הדאטה: מחלקה 1 היא אישור ומחלקה 0 היא דחייה. "
+            "התוצאה היא תחזית לימודית ואינה התחייבות לאישור הלוואה.",
+            "Dataset mapping: class 1 is Approved and class 0 is Rejected. "
+            "This educational prediction does not guarantee loan approval.",
         ),
     })
 

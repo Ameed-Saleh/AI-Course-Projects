@@ -343,14 +343,14 @@
                     <input
                         type="number"
                         id="person_age"
-                        min="20"
-                        max="80"
+                        min="{{ input_ranges['person_age']['min'] }}"
+                        max="{{ input_ranges['person_age']['max'] }}"
                         step="1"
                         required
                     >
 
                     <span class="field-hint" id="hint-age">
-                        טווח מומלץ: 20–80
+                        טווח מותר: 20–80
                     </span>
                 </div>
 
@@ -362,8 +362,9 @@
                     <input
                         type="number"
                         id="person_income"
-                        min="8000"
-                        step="1"
+                        min="{{ input_ranges['person_income']['min'] }}"
+                        max="{{ input_ranges['person_income']['max'] }}"
+                        step="any"
                         required
                     >
 
@@ -380,9 +381,9 @@
                     <input
                         type="number"
                         id="loan_amnt"
-                        min="500"
-                        max="35000"
-                        step="1"
+                        min="{{ input_ranges['loan_amnt']['min'] }}"
+                        max="{{ input_ranges['loan_amnt']['max'] }}"
+                        step="any"
                         required
                     >
 
@@ -399,8 +400,8 @@
                     <input
                         type="number"
                         id="loan_int_rate"
-                        min="5.42"
-                        max="20"
+                        min="{{ input_ranges['loan_int_rate']['min'] }}"
+                        max="{{ input_ranges['loan_int_rate']['max'] }}"
                         step="0.01"
                         required
                     >
@@ -424,6 +425,25 @@
 
                     <span class="field-hint" id="hint-percent">
                         מחושב אוטומטית ואינו נשלח כקלט ידני
+                    </span>
+                </div>
+
+                <div class="form-group">
+                    <label for="credit_score" id="label-credit">
+                        💳 ציון אשראי
+                    </label>
+
+                    <input
+                        type="number"
+                        id="credit_score"
+                        min="{{ input_ranges['credit_score']['min'] }}"
+                        max="{{ input_ranges['credit_score']['max'] }}"
+                        step="1"
+                        required
+                    >
+
+                    <span class="field-hint" id="hint-credit">
+                        טווח נתוני האימון: 390–850
                     </span>
                 </div>
 
@@ -467,6 +487,7 @@
 
     <script>
         let currentLanguage = "he";
+        const inputRanges = {{ input_ranges | tojson }};
 
         const translations = {
             he: {
@@ -478,14 +499,16 @@
                 amount: "💰 סכום ההלוואה ($)",
                 rate: "📈 שיעור ריבית (%)",
                 percent: "⚡ יחס הלוואה להכנסה",
+                credit: "💳 ציון אשראי",
                 defaults: "⚠️ כשל קודם בהחזר הלוואה?",
                 no: "לא",
                 yes: "כן",
-                ageHint: "טווח מומלץ: 20–80",
+                ageHint: "טווח מותר: 20–80",
                 incomeHint: "יש להזין הכנסה שנתית",
                 amountHint: "טווח נתוני האימון: 500–35,000",
                 rateHint: "לדוגמה: 11.50",
                 percentHint: "מחושב אוטומטית ואינו נשלח כקלט ידני",
+                creditHint: "טווח נתוני האימון: 390–850",
                 defaultsHint: "בחרו לפי היסטוריית ההלוואות",
                 submit: "🚀 בדוק זכאות עכשיו",
                 loading: "בודק את הבקשה...",
@@ -511,14 +534,16 @@
                 amount: "💰 Loan Amount ($)",
                 rate: "📈 Interest Rate (%)",
                 percent: "⚡ Loan-to-Income Ratio",
+                credit: "💳 Credit Score",
                 defaults: "⚠️ Previous Loan Default?",
                 no: "No",
                 yes: "Yes",
-                ageHint: "Recommended range: 20–80",
+                ageHint: "Allowed range: 20–80",
                 incomeHint: "Enter the annual income",
                 amountHint: "Training-data range: 500–35,000",
                 rateHint: "For example: 11.50",
                 percentHint: "Calculated automatically and not sent as manual input",
+                creditHint: "Training-data range: 390–850",
                 defaultsHint: "Select according to the loan history",
                 submit: "🚀 Check Eligibility",
                 loading: "Checking the application...",
@@ -545,6 +570,7 @@
             amount: document.getElementById("loan_amnt"),
             rate: document.getElementById("loan_int_rate"),
             ratio: document.getElementById("loan_percent_income"),
+            credit: document.getElementById("credit_score"),
             defaults: document.getElementById(
                 "previous_loan_defaults_on_file"
             )
@@ -565,10 +591,19 @@
         function calculateRatio() {
             const income = Number(elements.income.value);
             const amount = Number(elements.amount.value);
-
-            if (income > 0 && amount >= 0) {
-                elements.ratio.value =
-                    `${((amount / income) * 100).toFixed(2)}%`;
+            elements.amount.setCustomValidity("");
+            if (elements.income.value !== "" && elements.amount.value !== "" &&
+                Number.isFinite(income) && Number.isFinite(amount) && income > 0 && amount > 0) {
+                const ratio = amount / income;
+                elements.ratio.value = `${(ratio * 100).toFixed(2)}%`;
+                const limits = inputRanges.loan_percent_income;
+                if (ratio < limits.min || ratio > limits.max) {
+                    const min = (limits.min * 100).toFixed(4);
+                    const max = (limits.max * 100).toFixed(4);
+                    elements.amount.setCustomValidity(currentLanguage === "he"
+                        ? `יחס ההלוואה להכנסה חייב להיות בין ${min}% ל-${max}%. שנו את ההכנסה או סכום ההלוואה.`
+                        : `Loan-to-income ratio must be between ${min}% and ${max}%. Adjust income or loan amount.`);
+                }
             } else {
                 elements.ratio.value = "";
             }
@@ -615,6 +650,9 @@
             document.getElementById("label-percent").textContent =
                 text.percent;
 
+            document.getElementById("label-credit").textContent =
+                text.credit;
+
             document.getElementById("label-defaults").textContent =
                 text.defaults;
 
@@ -639,11 +677,15 @@
             document.getElementById("hint-percent").textContent =
                 text.percentHint;
 
+            document.getElementById("hint-credit").textContent =
+                text.creditHint;
+
             document.getElementById("hint-defaults").textContent =
                 text.defaultsHint;
 
             elements.submit.textContent = text.submit;
             elements.result.style.display = "none";
+            calculateRatio();
         }
 
         function showError(data) {
@@ -773,6 +815,7 @@
             async event => {
                 event.preventDefault();
 
+                calculateRatio();
                 if (!elements.form.reportValidity()) {
                     return;
                 }
@@ -790,6 +833,7 @@
                     person_income: elements.income.value,
                     loan_amnt: elements.amount.value,
                     loan_int_rate: elements.rate.value,
+                    credit_score: elements.credit.value,
                     previous_loan_defaults_on_file:
                         elements.defaults.value,
                     language: currentLanguage
