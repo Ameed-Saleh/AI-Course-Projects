@@ -7,6 +7,8 @@ The target mapping follows the dataset documentation: 1 means approved and
 import json
 import logging
 import os
+import time
+import uuid
 
 import joblib
 import numpy as np
@@ -14,7 +16,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.utils
 from feature_processing import loan_to_income_ratio
-from flask import Flask, jsonify, render_template, request, send_file
+from flask import Flask, g, jsonify, render_template, request, send_file
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, f1_score, precision_score, recall_score
 from sklearn.model_selection import train_test_split
 from sklearn.decomposition import PCA
@@ -25,9 +27,10 @@ app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
+    level=getattr(logging, os.getenv("LOG_LEVEL", "INFO").upper(), logging.INFO),
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
 )
+app.logger.setLevel(getattr(logging, os.getenv("LOG_LEVEL", "INFO").upper(), logging.INFO))
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "loan_svc_model_v1.0.pkl")
@@ -61,11 +64,30 @@ chart_data_cache = []
 decision_map_cache = {}
 
 
+@app.before_request
+def start_request_logging():
+    """Attach a request identifier and start a response-time timer."""
+    g.request_started_at = time.perf_counter()
+    g.request_id = request.headers.get("Rndr-Id") or uuid.uuid4().hex[:12]
+
+
 @app.after_request
-def disable_browser_cache(response):
-    """Prevent stale dashboard and prediction responses in the browser."""
+def finalize_response(response):
+    """Disable browser caching and write one structured log per request."""
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     response.headers["Pragma"] = "no-cache"
+    response.headers["X-Request-ID"] = getattr(g, "request_id", "unknown")
+
+    started_at = getattr(g, "request_started_at", time.perf_counter())
+    duration_ms = (time.perf_counter() - started_at) * 1000
+    app.logger.info(
+        "HTTP request completed | request_id=%s | method=%s | path=%s | status=%s | duration_ms=%.2f",
+        getattr(g, "request_id", "unknown"),
+        request.method,
+        request.path,
+        response.status_code,
+        duration_ms,
+    )
     return response
 
 
@@ -84,6 +106,8 @@ def load_model_and_compute_metrics():
     global model, metrics_cache, sample_data, validation_ranges, validation_medians, chart_data_cache, decision_map_cache, validation_ready
     validation_ready = False
     validation_ranges = {}
+    started_at = time.perf_counter()
+    app.logger.info("Application initialization started")
 
     if not os.path.exists(MODEL_PATH):
         app.logger.error("Model file not found at %s", MODEL_PATH)
@@ -91,7 +115,7 @@ def load_model_and_compute_metrics():
 
     try:
         model = joblib.load(MODEL_PATH)
-        app.logger.info("Model loaded successfully")
+        app.logger.info("Model loaded successfully | file=%s", os.path.basename(MODEL_PATH))
     except Exception:
         app.logger.exception("Could not load model")
         model = None
@@ -269,7 +293,12 @@ def load_model_and_compute_metrics():
                 "f1_score": round(report["weighted avg"]["f1-score"] * 100, 2),
             },
         }
-        app.logger.info("Model metrics calculated successfully")
+        app.logger.info(
+            "Model metrics calculated successfully | rows=%s | test_rows=%s | duration_ms=%.2f",
+            len(data),
+            len(y_test),
+            (time.perf_counter() - started_at) * 1000,
+        )
         validation_ready = True
         return True
     except Exception:
@@ -290,6 +319,13 @@ def localizer(language):
 
 def error_response(localized, message_he, message_en, status_code=422, field_errors=None):
     """Build a consistent localized JSON error response."""
+    app.logger.warning(
+        "Request validation failed | request_id=%s | path=%s | status=%s | fields=%s",
+        getattr(g, "request_id", "unknown"),
+        request.path,
+        status_code,
+        ",".join(sorted((field_errors or {}).keys())) or "none",
+    )
     return jsonify({
         "status": "error",
         "error": localized(message_he, message_en),
@@ -516,6 +552,17 @@ def build_explanation(values, has_default, ratio, localized):
 load_model_and_compute_metrics()
 
 
+@app.route("/health", methods=["GET"])
+def health():
+    """Return service readiness for Render health checks."""
+    ready = model is not None and validation_metadata_available()
+    if ready:
+        return jsonify({"status": "ok", "model_loaded": True}), 200
+
+    app.logger.error("Health check failed because the model or validation data is unavailable")
+    return jsonify({"status": "unavailable", "model_loaded": model is not None}), 503
+
+
 @app.route("/")
 def home():
     """Render the loan-eligibility form or a model-loading error."""
@@ -623,11 +670,21 @@ def download_model():
 def predict():
     """Validate a JSON request, run the pipeline, and return an explanation."""
     if model is None:
+        app.logger.error("Prediction rejected because the model is not loaded")
         return jsonify({"status": "error", "error": "Model not loaded"}), 503
 
     payload = request.get_json(silent=True)
     if not isinstance(payload, dict):
+        app.logger.warning(
+            "Prediction rejected because the request body is not valid JSON | request_id=%s",
+            getattr(g, "request_id", "unknown"),
+        )
         return jsonify({"status": "error", "error": "A valid JSON request body is required"}), 400
+
+    app.logger.info(
+        "Prediction request received | request_id=%s",
+        getattr(g, "request_id", "unknown"),
+    )
 
     localized = localizer(payload.get("language", "he"))
 
@@ -705,7 +762,12 @@ def predict():
     result_text = "Approved" if approved else "Rejected"
     reasons, recommendations = build_explanation(values, has_default, ratio, localized)
 
-    app.logger.info("Prediction completed: %s", result_text)
+    app.logger.info(
+        "Prediction completed | request_id=%s | result=%s | probability=%.2f",
+        getattr(g, "request_id", "unknown"),
+        result_text,
+        predicted_probability,
+    )
 
     return jsonify({
         "status": "success",
