@@ -11,8 +11,8 @@ prediction, and evaluation in one educational application.
 
 | Page | Hosted application |
 |---|---|
-| Prediction form / בדיקת זכאות | [Open application](https://ai-course-projects-45zz.onrender.com/) |
-| Model dashboard / מדדי המודל | [Open dashboard](https://ai-course-projects-45zz.onrender.com/dashboard) |
+| Prediction form / בדיקת זכאות | [Open application](https://loan-approval-prediction-ij1y.onrender.com/) |
+| Model dashboard / מדדי המודל | [Open dashboard](https://loan-approval-prediction-ij1y.onrender.com/dashboard) |
 
 These are the project's supplied deployment links. Local changes appear on the
 hosted application only after the updated project is deployed to Render.
