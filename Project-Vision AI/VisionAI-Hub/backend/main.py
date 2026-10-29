@@ -127,7 +127,7 @@ app = FastAPI(title="Vision AI API", lifespan=lifespan)
 async def prevent_stale_app_pages(request, call_next):
     response = await call_next(request)
     path = request.url.path
-    if path in {"/", "/home", "/mask", "/results", "/ready", "/health", "/mask/health"} or path.endswith((".js", ".css", ".json")):
+    if path in {"/", "/home", "/food", "/mask", "/results", "/ready", "/health", "/mask/health"} or path.endswith((".js", ".css", ".json")):
         response.headers["Cache-Control"] = "no-store, max-age=0"
     return response
 
@@ -137,7 +137,7 @@ app.mount("/hub-static", StaticFiles(directory=HUB_DIR), name="hub-static")
 app.mount("/mask-static", StaticFiles(directory=MASK_FRONTEND_DIR), name="mask-static")
 
 
-@app.get("/home", include_in_schema=False)
+@app.api_route("/home", methods=["GET", "HEAD"], include_in_schema=False)
 def vision_home():
     return FileResponse(HUB_DIR / "index.html")
 
@@ -157,8 +157,13 @@ def mask_home():
     return FileResponse(MASK_FRONTEND_DIR / "index.html")
 
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"], include_in_schema=False)
 def read_root():
+    return FileResponse(HUB_DIR / "index.html")
+
+
+@app.get("/food", include_in_schema=False)
+def food_home():
     return FileResponse(FRONTEND_DIR / "index.html")
 
 

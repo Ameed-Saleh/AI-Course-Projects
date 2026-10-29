@@ -2,6 +2,22 @@
 
 מערכת לזיהוי מזון ומסכות בתמונות באמצעות רשתות נוירונים מסוג **CNN**. הפרויקט מחבר בין אימון מודלים ב־Google Colab לבין אתר שבו ניתן להעלות תמונה ולקבל תחזית מהמודלים השמורים. מסמך זה מרכז את התיעוד של כל חלקי הפרויקט.
 
+## 🌐 האתר ב־Render
+
+**[פתיחת Vision AI](https://vision-ai-hub.onrender.com/)**
+
+הכתובת הראשית `/` פותחת את דף הבית המשותף. גם `/home` מציג את אותו דף. מודל המזון נגיש ב־`/food`, ומודל המסכות ב־`/mask`.
+
+| עמוד | כתובת ציבורית |
+|---|---|
+| דף הבית | https://vision-ai-hub.onrender.com/ |
+| זיהוי מזון | https://vision-ai-hub.onrender.com/food |
+| זיהוי מסכות | https://vision-ai-hub.onrender.com/mask |
+| תוצאות המודלים | https://vision-ai-hub.onrender.com/results |
+| מוכנות המודלים וגלאי הפנים | https://vision-ai-hub.onrender.com/ready |
+
+האתר והמודלים פועלים בשרת של Render. המבקרים צריכים דפדפן וחיבור לאינטרנט בלבד; אין צורך להתקין Python או להפעיל את המחשב האישי ו־ngrok. במסלול Free השירות עשוי להירדם לאחר 15 דקות ללא תעבורה, ולכן הכניסה הבאה יכולה להתעכב בזמן ההפעלה מחדש.
+
 ## 🎯 יכולות המערכת
 
 | רכיב | תפקיד |
@@ -144,8 +160,8 @@ python -m uvicorn main:app --app-dir VisionAI-Hub/backend --host 0.0.0.0 --port 
 
 | עמוד | כתובת |
 |---|---|
-| 🏠 דף הבית | http://localhost:8000/home |
-| 🍽️ זיהוי מזון | http://localhost:8000/ |
+| 🏠 דף הבית | http://localhost:8000/ או http://localhost:8000/home |
+| 🍽️ זיהוי מזון | http://localhost:8000/food |
 | 😷 זיהוי מסכות | http://localhost:8000/mask |
 | 📈 תוצאות המודלים | http://localhost:8000/results |
 | ✅ מוכנות המודלים וגלאי הפנים | http://localhost:8000/ready |
@@ -192,15 +208,44 @@ python VisionAI-Hub/build_results.py
 
 מחברות האימון: [FoodVision](FoodVision-AI/training/foodvision_training.ipynb) · [MaskVision](MaskVision-AI/training/MaskVision_AI_2_Classes.ipynb).
 
+## ☁️ הגדרות הפריסה ל־Render
+
+השירות נפרס מתוך מאגר הקורס `Ameed-Saleh/AI-Course-Projects`, עם ההגדרות הבאות:
+
+| הגדרה | ערך |
+|---|---|
+| Name | `vision-ai-hub` |
+| Runtime | `Python 3` |
+| Branch | `master` |
+| Root Directory | `Project-Vision AI` |
+| Build Command | `pip install -r requirements.txt` |
+| Start Command | `python -m uvicorn main:app --app-dir VisionAI-Hub/backend --host 0.0.0.0 --port $PORT --workers 1` |
+
+משתני הסביבה שנקבעו לפריסה:
+
+| שם | ערך |
+|---|---|
+| `PYTHON_VERSION` | `3.12.10` |
+| `TF_NUM_INTRAOP_THREADS` | `1` |
+| `TF_NUM_INTEROP_THREADS` | `1` |
+| `OMP_NUM_THREADS` | `1` |
+| `MALLOC_ARENA_MAX` | `2` |
+
+מומלץ להגדיר ב־Render את **Health Check Path** ל־`/ready`, כדי לבדוק את מוכנות שני המודלים וגלאי הפנים. הגדרות הסביבה הן של השרת ואינן נדרשות אצל מבקרי האתר. תמונות המשתמשים משמשות לחיזוי ואינן נשמרות על הדיסק.
+
+הפריסה הראשונית נבדקה דרך הכתובת הציבורית: טעינת עמודים, מוכנות המודלים, חיזוי מזון, חיזוי מסכות ודחיית תמונה עם כמה פנים. לאחר עדכון קוד יש לבצע Commit ו־Push למאגר, ולהמתין להשלמת הפריסה ב־Render לפני בדיקת הגרסה החדשה. ההגדרות ושינויי הקוד נשמרים ב־Git; צילומי ההדגמה אינם בדיקה חדשה בכל פתיחה.
+
+מקורות: [פריסת FastAPI](https://render.com/docs/deploy-fastapi), [תיקיית שורש במאגר מרובה פרויקטים](https://render.com/docs/monorepo-support), [מגבלות מסלול Free](https://render.com/docs/free).
+
 ## 📱 הדגמה מהטלפון
 
-לאחר התקנת ngrok והגדרת החשבון, פתחו מנהרה לשרת המקומי בטרמינל נוסף:
+צילומי ההדגמה נשמרו מהפעלה מקומית דרך ngrok. האתר הציבורי זמין כעת דרך Render; מנהרת ngrok נחוצה רק כאשר רוצים להדגים שרת שפועל במחשב האישי. לאחר התקנת ngrok והגדרת החשבון, פתחו מנהרה לשרת המקומי בטרמינל נוסף:
 
 ```powershell
 ngrok http 8000
 ```
 
-פתחו בטלפון את כתובת ה־HTTPS שמתקבלת והוסיפו `/home`. המחשב, השרת ו־ngrok צריכים להישאר פעילים ומחוברים לאינטרנט. **כתובת אירוח קבועה והסבר על הפריסה יתווספו לאחר שהפריסה תושלם ותיבדק.**
+פתחו בטלפון את כתובת ה־HTTPS שמתקבלת. דף הבית נגיש גם ב־`/home`. בזמן שימוש במנהרה המקומית בלבד, המחשב, השרת ו־ngrok צריכים להישאר פעילים ומחוברים לאינטרנט.
 
 ### צילומי הדגמה מהטלפון — 29.10.2026
 
