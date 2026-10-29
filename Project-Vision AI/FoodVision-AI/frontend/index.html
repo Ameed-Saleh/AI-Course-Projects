@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101114">
+  <title>FoodVision AI</title>
+  <link rel="stylesheet" href="/static/style.css?v=food-collection-1">
+  <script src="/static/script.js?v=food-collection-1" defer></script>
+</head>
+<body>
+  <header class="header container">
+    <div class="brand"><span class="logo" aria-hidden="true">◈</span><bdi>FoodVision <span>AI</span></bdi></div>
+    <nav data-label="navigation">
+      <a class="home-return" id="hub-home-link" href="/home" data-i18n="backToHome">Back to Home</a>
+      <a class="nav-link" href="#studio" data-i18n="navStudio"></a>
+      <div class="language-switch" role="group" data-label="language"><button type="button" data-language="he" data-i18n="languageHebrew" lang="he" dir="rtl"></button><button type="button" data-language="en" data-i18n="languageEnglish" lang="en" dir="ltr"></button></div>
+      <button class="theme-toggle" id="theme-toggle" type="button"><span id="theme-icon" aria-hidden="true">☀</span><span class="sr-only" id="theme-label"></span></button>
+    </nav>
+  </header>
+  <main class="container">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="live-dot"></span><span data-i18n="eyebrow"></span></p>
+        <h1><span data-i18n="heroTitle"></span><br><em data-i18n="heroAccent"></em></h1>
+        <p class="subtitle" data-i18n="intro"></p>
+        <div class="hero-actions"><a class="button primary" href="#studio"><span data-i18n="heroCta"></span><span aria-hidden="true">↗</span></a><span class="hero-note" data-i18n="heroNote"></span></div>
+        <div class="hero-tags"><span data-i18n="tagVision"></span><span data-i18n="tagFood"></span><span data-i18n="tagCuriosity"></span></div>
+      </div>
+      <div class="hero-visual">
+        <picture class="hero-picture">
+          <source media="(max-width: 760px)" srcset="/static/assets/ramen-hero-mobile.jpg">
+          <img class="hero-photo" src="/static/assets/ramen-hero.jpg" width="1122" height="1402" fetchpriority="high" decoding="sync" data-alt="artLabel">
+        </picture>
+        <div class="photo-shade" aria-hidden="true"></div>
+        <div class="visual-top"><span class="live-dot"></span><span data-i18n="visualTitle"></span><bdi>FV / 01</bdi></div>
+        <div class="focus-frame" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <div class="visual-chip chip-one"><span aria-hidden="true">✦</span><div><strong data-i18n="chipTitle"></strong><small data-i18n="chipSubtitle"></small></div></div>
+        <div class="visual-chip chip-two"><span aria-hidden="true">▥</span><div><strong data-i18n="chipStatus"></strong><small data-i18n="chipStatusSub"></small></div></div>
+        <div class="visual-bottom"><span class="visual-caption" data-i18n="visualCaption"></span><span class="visual-index" aria-hidden="true">01 — FV</span></div>
+      </div>
+    </section>
+    <div class="project-strip"><span data-i18n="stripLabel"></span><span data-i18n="stripOne"></span><span data-i18n="stripTwo"></span><span data-i18n="stripThree"></span></div>
+    <section class="studio" id="studio" aria-labelledby="studio-title">
+      <div class="section-heading"><div><p class="eyebrow" data-i18n="studioEyebrow"></p><h2 id="studio-title" data-i18n="studioTitle"></h2><p class="section-description" data-i18n="studioDescription"></p></div><span class="status-badge"><span class="live-dot"></span><span data-i18n="modelStatus"></span></span></div>
+      <div class="workspace">
+        <section class="card upload-card" aria-labelledby="upload-title">
+          <div class="card-heading"><span class="step">01</span><h3 id="upload-title" data-i18n="uploadTitle"></h3><span class="card-kicker" data-i18n="localOnly"></span></div>
+          <div class="drop-zone" id="drop-zone" aria-busy="false"><div id="empty-preview"><span class="upload-icon" aria-hidden="true">↥</span><h4 data-i18n="uploadPrompt"></h4><p data-i18n="uploadInstructions"></p><span class="file-hint" data-i18n="fileHint"></span></div><img id="preview" data-alt="previewAlt" hidden></div>
+          <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" data-label="chooseImage" hidden>
+          <input type="file" id="camera-input" accept="image/*" capture="environment" data-label="camera" hidden>
+          <div class="source-buttons"><button class="button secondary" id="choose-button" type="button"><span aria-hidden="true">＋</span><span data-i18n="chooseImage"></span></button><button class="button secondary" id="camera-button" type="button"><span aria-hidden="true">◎</span><span data-i18n="camera"></span></button></div>
+          <p class="helper" data-i18n="cameraHelp"></p>
+          <div class="file-details" id="file-details" hidden><bdi id="file-name"></bdi><button id="remove-button" type="button" data-i18n="remove"></button></div>
+          <section class="demo-examples" aria-labelledby="examples-title"><h4 id="examples-title" data-i18n="examplesTitle">נסו דוגמה</h4><p data-i18n="examplesHint">לחיצה טוענת תמונה לדוגמה ומפעילה זיהוי אמיתי.</p><div class="example-options"><button type="button" class="example-button" data-example="/static/assets/example-fruit.jpg"><img src="/static/assets/example-fruit.jpg" alt="" width="64" height="64" loading="lazy"><span data-i18n="exampleFruit">פירות</span><span aria-hidden="true">↗</span></button><button type="button" class="example-button" data-example="/static/assets/ramen-hero-mobile.jpg"><img src="/static/assets/ramen-hero-mobile.jpg" alt="" width="64" height="64" loading="lazy"><span data-i18n="exampleRamen">קערת ראמן</span><span aria-hidden="true">↗</span></button></div></section><p class="feedback" id="upload-message" role="status" aria-live="polite"></p>
+          <div class="actions"><button class="button primary" id="classify-button" type="button" disabled><span data-i18n="classify"></span><span aria-hidden="true">✦</span></button><button class="button secondary" id="save-button" type="button" disabled><span data-i18n="save"></span><span aria-hidden="true">↓</span></button></div>
+        </section>
+        <section class="card results-card" aria-labelledby="results-title">
+          <div class="card-heading"><span class="step">02</span><h3 id="results-title" data-i18n="resultsTitle"></h3></div>
+          <div class="result-topline"><span class="result-kicker" data-i18n="analysisLabel"></span><span class="result-engine"><span class="live-dot"></span><bdi>FOOD-11 / CNN</bdi></span></div>
+          <div id="prediction-surface" class="prediction-surface">
+            <div class="prediction-title-row"><span id="category-icon" class="category-icon" aria-hidden="true">◎</span><span id="prediction-status" class="prediction-status"></span></div>
+            <p id="prediction-label" class="prediction-label" data-i18n="predictedFood"></p>
+            <h4 id="result-heading"></h4>
+            <p id="best-match" class="best-match" hidden></p>
+            <div id="confidence-section" class="confidence-section" hidden>
+              <div class="confidence-head"><span data-i18n="confidence"></span><bdi id="confidence-result" dir="ltr"></bdi></div>
+              <div id="confidence-meter" class="confidence-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-label="confidence"><span id="confidence-fill" class="meter-fill"></span><span class="threshold-marker" aria-hidden="true"></span></div>
+              <div class="confidence-caption"><span data-i18n="modelScore"></span><span data-i18n="thresholdLabel"></span></div>
+            </div>
+          </div>
+          <p id="result-message" class="result-interpretation" role="status" aria-live="polite"></p>
+          <section id="top-predictions" class="top-predictions" aria-labelledby="top-predictions-title" hidden>
+            <div class="ranking-heading"><h5 id="top-predictions-title" data-i18n="topThree"></h5><span data-i18n="probabilityLabel"></span></div>
+            <ol id="probability-list" class="probability-list"></ol>
+          </section>
+          <div class="honesty-note"><span aria-hidden="true">ⓘ</span><p data-i18n="honesty"></p></div>
+        </section>
+      </div>
+    </section>
+    <section class="food-collection" aria-labelledby="food-collection-title">
+      <div class="food-collection-intro">
+        <span class="food-collection-eyebrow" data-i18n="categoryEyebrow"></span>
+        <h2 id="food-collection-title" data-i18n="categoryTitle"></h2>
+        <p data-i18n="categoryIntro"></p>
+        <div class="food-collection-count"><bdi>11</bdi><span data-i18n="categoryCount"></span><span class="food-collection-spark" aria-hidden="true">✧</span></div>
+      </div>
+      <div class="food-collection-content">
+        <ul class="food-category-grid">
+          <li class="food-category" data-food-category="Bread"><span class="food-category-icon" aria-hidden="true">🍞</span><div class="food-category-copy"><span class="food-category-name">Bread</span><bdi class="food-category-original" dir="ltr" hidden>Bread</bdi></div><span class="food-category-dot" aria-hidden="true"></span></li>
+          <li class="food-category" data-food-category="Dairy product"><span class="food-category-icon" aria-hidden="true">🥛</span><div class="food-category-copy"><span class="food-category-name">Dairy product</span><bdi class="food-category-original" dir="ltr" hidden>Dairy product</bdi></div><span class="food-category-dot" aria-hidden="true"></span></li>
+          <li class="food-category" data-food-category="Dessert"><span class="food-category-icon" aria-hidden="true">🍰</span><div class="food-category-copy"><span class="food-category-name">Dessert</span><bdi class="food-category-original" dir="ltr" hidden>Dessert</bdi></div><span class="food-category-dot" aria-hidden="true"></span></li>
+          <li class="food-category" data-food-category="Egg"><span class="food-category-icon" aria-hidden="true">🥚</span><div class="food-category-copy"><span class="food-category-name">Egg</span><bdi class="food-category-original" dir="ltr" hidden>Egg</bdi></div><span class="food-category-dot" aria-hidden="true"></span></li>
+          <li class="food-category" data-food-category="Fried food"><span class="food-category-icon" aria-hidden="true">🍟</span><div class="food-category-copy"><span class="food-category-name">Fried food</span><bdi class="food-category-original" dir="ltr" hidden>Fried food</bdi></div><span class="food-category-dot" aria-hidden="true"></span></li>
+          <li class="food-category" data-food-category="Meat"><span class="food-category-icon" aria-hidden="true">🥩</span><div class="food-category-copy"><span class="food-category-name">Meat</span><bdi class="food-category-original" dir="ltr" hidden>Meat</bdi></div><span class="food-category-dot" aria-hidden="true"></span></li>
+          <li class="food-category" data-food-category="Noodles-Pasta"><span class="food-category-icon" aria-hidden="true">🍝</span><div class="food-category-copy"><span class="food-category-name">Noodles-Pasta</span><bdi class="food-category-original" dir="ltr" hidden>Noodles-Pasta</bdi></div><span class="food-category-dot" aria-hidden="true"></span></li>
+          <li class="food-category" data-food-category="Rice"><span class="food-category-icon" aria-hidden="true">🍚</span><div class="food-category-copy"><span class="food-category-name">Rice</span><bdi class="food-category-original" dir="ltr" hidden>Rice</bdi></div><span class="food-category-dot" aria-hidden="true"></span></li>
+          <li class="food-category" data-food-category="Seafood"><span class="food-category-icon" aria-hidden="true">🦐</span><div class="food-category-copy"><span class="food-category-name">Seafood</span><bdi class="food-category-original" dir="ltr" hidden>Seafood</bdi></div><span class="food-category-dot" aria-hidden="true"></span></li>
+          <li class="food-category" data-food-category="Soup"><span class="food-category-icon" aria-hidden="true">🍲</span><div class="food-category-copy"><span class="food-category-name">Soup</span><bdi class="food-category-original" dir="ltr" hidden>Soup</bdi></div><span class="food-category-dot" aria-hidden="true"></span></li>
+          <li class="food-category" data-food-category="Vegetable-Fruit"><span class="food-category-icon" aria-hidden="true">🥦</span><div class="food-category-copy"><span class="food-category-name">Vegetable-Fruit</span><bdi class="food-category-original" dir="ltr" hidden>Vegetable-Fruit</bdi></div><span class="food-category-dot" aria-hidden="true"></span></li>
+        </ul>
+        <p class="food-collection-note"><span aria-hidden="true">◎</span><span data-i18n="categoryNote"></span></p>
+      </div>
+    </section>
+    <section class="details" data-label="workflow"><article><span>01 /</span><h3 data-i18n="stepOneTitle"></h3><p data-i18n="stepOneText"></p></article><article><span>02 /</span><h3 data-i18n="stepTwoTitle"></h3><p data-i18n="stepTwoText"></p></article><article><span>03 /</span><h3 data-i18n="stepThreeTitle"></h3><p data-i18n="stepThreeText"></p></article></section>
+  </main>
+  <footer class="container"><div class="brand"><span class="logo" aria-hidden="true">◈</span><bdi>FoodVision <span>AI</span></bdi></div><p data-i18n="footer"></p><span data-i18n="footerNote"></span></footer>
+</body>
+</html>

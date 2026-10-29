@@ -1,0 +1,16 @@
+{
+    "verified": true,
+    "color_mode": "RGB",
+    "image_size": [
+        128,
+        128
+    ],
+    "resample": "tensorflow_bilinear",
+    "scale_divisor": 255,
+    "source": "training/MaskVision_AI_2_Classes.ipynb, cell 8",
+    "label_policy": {
+        "incorrect_mask": "excluded",
+        "with_mask": "with_mask",
+        "without_mask": "without_mask"
+    }
+}

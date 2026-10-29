@@ -1,0 +1,141 @@
+[
+  {
+    "id": "cellular",
+    "cover": "home-cellular.jpg",
+    "badge": [
+      "גישה מהטלפון · NGROK",
+      "PHONE ACCESS · NGROK"
+    ],
+    "title": [
+      "מהמחשב אל הטלפון",
+      "From computer to phone"
+    ],
+    "description": [
+      "דף הבית כפי שהוצג בטלפון, עם כתובת ngrok בשורת הכתובת. סוג החיבור בזמן צילום המסך אינו מעיד באיזה חיבור בוצע החיזוי.",
+      "The homepage as displayed on a phone, with the ngrok address visible. The connection shown when the screenshot was taken does not establish which connection was used for inference."
+    ],
+    "images": [
+      {
+        "file": "home-cellular.jpg",
+        "caption": [
+          "דף הבית בטלפון, עם כתובת HTTPS של ngrok. צילום זה מתעד את תצוגת האתר ולא את חיבור הרשת שבו בוצע החיזוי.",
+          "The homepage on a phone with the ngrok HTTPS address visible. This screenshot records the website display, not the network connection used for inference."
+        ]
+      },
+      {
+        "file": "home-about.jpg",
+        "caption": [
+          "הסבר הפרויקט ושלבי השימוש בתצוגת טלפון.",
+          "Project description and usage steps on a phone."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "without",
+    "cover": "mask-without-result.jpg",
+    "badge": [
+      "MASKVISION · ללא מסכה",
+      "MASKVISION · WITHOUT MASK"
+    ],
+    "title": [
+      "בלי מסכה · 80.6%",
+      "Without mask · 80.6%"
+    ],
+    "description": [
+      "תמונת קלט ותוצאת ״בלי מסכה״ בביטחון 80.6% מהטלפון. בצילומי המסך המעודכנים מופיע חיבור 5G ללא סמל Wi‑Fi.",
+      "A phone input image and a Without mask prediction at 80.6% confidence. The updated screenshots show a 5G connection without a Wi-Fi indicator."
+    ],
+    "images": [
+      {
+        "file": "mask-without-input.jpg",
+        "caption": [
+          "תמונת הקלט בממשק הטלפון; בשורת המצב מופיע 5G ללא סמל Wi‑Fi.",
+          "The input image in the phone interface; the status bar shows 5G without a Wi-Fi indicator."
+        ],
+        "version": "20261029-2212"
+      },
+      {
+        "file": "mask-without-result.jpg",
+        "caption": [
+          "״בלי מסכה״ — 80.6%; ״עם מסכה״ — 19.4%. בצילום מופיע סמל 5G.",
+          "Without mask — 80.6%; With mask — 19.4%. The screenshot shows the 5G indicator."
+        ],
+        "version": "20261029-2212"
+      }
+    ]
+  },
+  {
+    "id": "facepaint",
+    "cover": "facepaint-result.jpg",
+    "badge": [
+      "MASKVISION · מקרה כשל",
+      "MASKVISION · FAILURE CASE"
+    ],
+    "title": [
+      "איפור פנים שמבלבל את המודל",
+      "Face paint that confuses the model"
+    ],
+    "description": [
+      "בדוגמה זו אין מסכה, אך המודל חזה ״עם מסכה״ בביטחון 98.2%. דוגמה למגבלה: ביטחון גבוה אינו מבטיח תשובה נכונה.",
+      "This image has no mask, but the model predicted With mask at 98.2% confidence. A limitation of the model: high confidence does not guarantee a correct answer."
+    ],
+    "images": [
+      {
+        "file": "facepaint-input.jpg",
+        "caption": [
+          "תמונת פנים עם איפור וללא מסכה בממשק הטלפון. בשורת המצב מופיע 5G.",
+          "A painted face without a mask in the phone interface. The status bar shows 5G."
+        ],
+        "version": "20261029-2212"
+      },
+      {
+        "file": "facepaint-result.jpg",
+        "caption": [
+          "מקרה כשל: ״עם מסכה״ בביטחון 98.2% בתמונה ללא מסכה. בצילום מופיע 5G; שורת הכתובת אינה מוצגת.",
+          "Failure case: With mask at 98.2% confidence for an image without a mask. The screenshot shows 5G; the address bar is not visible."
+        ],
+        "version": "20261029-2212"
+      }
+    ]
+  },
+  {
+    "id": "food",
+    "cover": "food-result.jpg",
+    "badge": [
+      "FOODVISION · זיהוי מזון",
+      "FOODVISION · FOOD RECOGNITION"
+    ],
+    "title": [
+      "ביצה · 95.06%",
+      "Egg · 95.06%"
+    ],
+    "description": [
+      "תמונה שהועלתה מהטלפון וסווגה כ״ביצה״. הממשק מציג גם את התחזיות החלופיות.",
+      "An image uploaded from a phone and classified as Egg. The interface also shows alternative predictions."
+    ],
+    "images": [
+      {
+        "file": "food-source.jpg",
+        "caption": [
+          "תמונת המזון שנבחרה לצורך ההדגמה.",
+          "The food image selected for the demonstration."
+        ]
+      },
+      {
+        "file": "food-input.jpg",
+        "caption": [
+          "תמונת המזון כפי שהוצגה לאחר ההעלאה בטלפון.",
+          "The food image displayed after uploading it from the phone."
+        ]
+      },
+      {
+        "file": "food-result.jpg",
+        "caption": [
+          "תחזית ״ביצה״ בביטחון 95.06%, לצד תחזיות לחם ואטריות ופסטה.",
+          "Egg prediction at 95.06% confidence, alongside Bread and Noodles-Pasta alternatives."
+        ]
+      }
+    ]
+  }
+]

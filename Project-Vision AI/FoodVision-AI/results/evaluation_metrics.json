@@ -1,0 +1,7 @@
+{
+  "selected_model": "Improved CNN",
+  "images": 3347,
+  "accuracy": 0.7206453680992126,
+  "loss": 0.90625,
+  "macro_f1": 0.7151818700742066
+}

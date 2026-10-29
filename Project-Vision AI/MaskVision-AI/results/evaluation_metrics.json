@@ -1,0 +1,15 @@
+{
+  "selected_model": "Baseline CNN",
+  "images": 1432,
+  "accuracy": 0.9546089172363281,
+  "loss": 0.12389517575502396,
+  "macro_f1": 0.9546087393294207,
+  "rounded": false,
+  "source": "MaskVision_AI_2_Classes.ipynb: held-out Evaluation split",
+  "label_policy": {
+    "incorrect_mask": "excluded",
+    "with_mask": "with_mask",
+    "without_mask": "without_mask"
+  },
+  "limitations": "Random file split; duplicate images and identities were not checked. Face detector and Unknown threshold excluded."
+}

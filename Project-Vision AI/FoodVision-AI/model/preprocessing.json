@@ -1,0 +1,31 @@
+{
+    "image_size": [
+        128,
+        128
+    ],
+    "color_mode": "rgb",
+    "resize_backend": "tensorflow",
+    "interpolation": "bilinear",
+    "antialias": false,
+    "preserve_aspect_ratio": false,
+    "normalization": "divide_by_255",
+    "input_range": [
+        0.0,
+        1.0
+    ],
+    "class_names": [
+        "Bread",
+        "Dairy product",
+        "Dessert",
+        "Egg",
+        "Fried food",
+        "Meat",
+        "Noodles-Pasta",
+        "Rice",
+        "Seafood",
+        "Soup",
+        "Vegetable-Fruit"
+    ],
+    "unknown_threshold": 0.6,
+    "unknown_threshold_note": "Assignment rule; not calibrated as an out-of-distribution detector"
+}

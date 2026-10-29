@@ -1,0 +1,7 @@
+Dataset,Class,Images
+training,with_mask,3352
+training,without_mask,3322
+validation,with_mask,718
+validation,without_mask,712
+evaluation,with_mask,719
+evaluation,without_mask,713

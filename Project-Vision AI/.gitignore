@@ -1,0 +1,29 @@
+# Local Python environments and generated caches
+**/.venv*/
+**/venv/
+**/__pycache__/
+*.py[cod]
+**/.ipynb_checkpoints/
+.pytest_cache/
+
+# Temporary files, local executables, and dataset archives
+/tmp/
+/tools/
+*.zip
+**/dataset/
+**/datasets/
+
+# Credentials and machine-specific settings
+.env
+.env.*
+!.env.example
+.aws/
+.codex/
+.agents/
+.vscode/
+**/.idea/
+*.log
+.DS_Store
+Thumbs.db
+
+# Model exports, notebooks, evaluation CSV/JSON/PNG files and the PDF stay tracked.
